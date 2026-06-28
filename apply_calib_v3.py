@@ -8,9 +8,9 @@ import numpy as np
 # ======================================================
 
 
-dummy = False
+dummy = True
 
-root_file = "cat_386_100GeV_v3.0.root"
+root_file = "../cat_386_100GeV_first26files.root" #../cat_386_100GeV_v3.0.root"
 
 tree_name = "tree"
 
@@ -34,7 +34,6 @@ if not dummy:
         df["layer"].to_numpy(np.int32),
     ] = 32.7709/26.2086*42.0224/df["mpv"].to_numpy(np.float32)
 
-
 # ======================================================
 # Read ROOT tree
 # ======================================================
@@ -50,8 +49,8 @@ branches = [
     "crilin_layer",
     "crilin_peak",
     "beamcatcher_peak",
-    "crilin_ix_centroid_layer_1",
-    "crilin_iy_centroid_layer_1",
+    #"crilin_ix_centroid",
+    #"crilin_iy_centroid",
 ]
 
 coeffs = []
@@ -79,17 +78,15 @@ with uproot.open(root_file) as f:
             peak *= coeff[ix, iy, layer]
             peak *= thr
 
-        print("coeff[ix, iy, layer].shape", coeff[ix, iy, layer].shape)
         coeffs.append(coeff[ix, iy, layer])
 
         print(arr["beamcatcher_peak"].shape)
-        print(arr["crilin_ix_centroid_layer_1"].shape)
 
         mask = (
             (arr["beamcatcher_peak"][:, 0] > -10) #was < 10
             # & (peak[:, 223]*4 < 1400) & (peak[:, 224]*6 < 1400)
-            #& (np.abs(14 * arr["crilin_ix_centroid_layer_1"]) < 2)
-            #& (np.abs(14 * arr["crilin_iy_centroid_layer_1"]) < 2)
+            #& (np.abs(14 * arr["crilin_ix_centroid"]) < 2)
+            #& (np.abs(14 * arr["crilin_iy_centroid"]) < 2)
         )
 
         print(mask.shape)
@@ -128,5 +125,5 @@ h.FillN(event_sum.size, event_sum.astype(np.float64), weights)
 c = ROOT.TCanvas("c", "Event Sum", 800, 600)
 h.Draw("HIST")
 
-c.SaveAs("event_sum_{root_file.replace('.root', '')}.png")
-c.SaveAs(f"event_sum_{root_file}")
+c.SaveAs("event_sum.png")
+c.SaveAs(f"event_sum.root")
